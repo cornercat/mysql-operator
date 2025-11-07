@@ -162,9 +162,27 @@ spec:
   {{- end }}
 {{- end }}
   # Keyring
-{{- if (or (((.Values).keyring).file) (((.Values).keyring).encryptedFile) (((.Values).keyring).oci) ) }}
+{{- if (or (((.Values).keyring).kmip) (((.Values).keyring).file) (((.Values).keyring).encryptedFile) (((.Values).keyring).oci) (((.Values).keyring).hashicorp) ) }}
   keyring:
 {{- $keyringAlreadySpecified := "" }}
+  {{- if (((.Values).keyring).kmip) }}
+    {{- if $keyringAlreadySpecified }}
+      {{- $err := printf "Keyring '%s' already specified" $keyringAlreadySpecified }}
+      {{- fail $err }}
+    {{- end }}
+    {{- $keyringAlreadySpecified = "kmip" }}
+    {{- with .Values.keyring.kmip }}
+    kmip:
+      configuration: {{ required "keyring.kmip.configuration is required" .configuration | quote }}
+      {{- if hasKey . "cacheKeys" }}
+      cacheKeys: {{ .cacheKeys }}
+      {{- end }}
+      server: {{ required "keyring.kmip.server is required" .server | quote }}
+      {{- if hasKey . "standbyServer" }}
+      standbyServer: {{ toYaml .standbyServer | nindent 8 }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
   {{- if (((.Values).keyring).file) }}
     {{- if $keyringAlreadySpecified }}
       {{- $err := printf "Keyring '%s' already specified" $keyringAlreadySpecified }}
@@ -195,6 +213,49 @@ spec:
       {{- end }}
       password: {{ required "keyring.encryptedFile.password is required" .password | quote }}
       storage: {{ toYaml .storage | nindent 8 }}
+    {{- end }}
+  {{- end }}
+
+  {{- if (((.Values).keyring).hashicorp) }}
+    {{- if $keyringAlreadySpecified }}
+      {{- $err := printf "Keyring '%s' already specified" $keyringAlreadySpecified }}
+      {{- fail $err }}
+    {{- end }}
+    {{- $keyringAlreadySpecified = "hashicorp" }}
+    {{- with .Values.keyring.hashicorp }}
+    hashicorp:
+      serverUrl: {{ required "keyring.hashicorp.serverUrl is required" .serverUrl | quote }}
+      storePath: {{ required "keyring.hashicorp.storePath is required" .storePath | quote }}
+      {{- if hasKey . "caching" }}
+      caching: {{ .caching }}
+      {{- end }}
+      {{- if hasKey . "caCertificates" }}
+      caCertificates: {{ .caCertificates }}
+      {{- end }}
+      auth:
+        {{- $hashicorpAuthAlreadySpecified := "" }}
+        {{- if .auth.approle}}
+          {{- if $hashicorpAuthAlreadySpecified }}
+            {{- $err := printf "Authentication mechanism '%s' already specified" $hashicorpAuthAlreadySpecified }}
+            {{- fail $err }}
+          {{- end }}
+          {{- $hashicorpAuthAlreadySpecified = "approle" }}
+          approle:
+            authSecret: {{ .auth.approle.authSecret }}
+            {{- if .auth.approle.authenticationPath }}
+            authenticationPath: {{ .auth.approle.authenticationPath }}
+            {{- end }}
+        {{- end}}
+
+        {{- if .auth.token}}
+          {{- if $hashicorpAuthAlreadySpecified }}
+            {{- $err := printf "Authentication mechanism '%s' already specified" $hashicorpAuthAlreadySpecified }}
+            {{- fail $err }}
+          {{- end }}
+          {{- $hashicorpAuthAlreadySpecified = "token" }}
+          token:
+            tokenSecret: {{ .auth.token.tokenSecret }}
+        {{- end}}
     {{- end }}
   {{- end }}
 

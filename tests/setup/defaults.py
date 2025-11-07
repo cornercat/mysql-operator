@@ -6,10 +6,15 @@
 import os
 
 # version
-VERSION_TAG = "9.4.0"
+VERSION_TAG = "9.5.0"
 
 MIN_SUPPORTED_VERSION = "8.0.28"
-MAX_SUPPORTED_VERSION = "9.4.0"
+MAX_SUPPORTED_VERSION = "9.5.0"
+
+# Some tests won't work if jumping from MIN_SUPPORTED_VERSION to MAX_SUPPORTED_VERSION
+# The result will be
+# [ERROR] [MY-014060] [Server] Invalid MySQL server upgrade: Cannot upgrade from 80028 to 90500. Upgrade to next major version is only allowed from the last LTS release, which version 80028 is not.
+CURRENT_LTS_VERSION="8.4.5"
 
 # image
 IMAGE_REGISTRY = os.getenv(
@@ -27,7 +32,7 @@ OPERATOR_EE_IMAGE_NAME = os.getenv(
     "OPERATOR_TEST_EE_IMAGE_NAME", default="enterprise-operator")
 
 OPERATOR_VERSION_TAG = os.getenv(
-    "OPERATOR_TEST_VERSION_TAG", default="9.4.0-2.2.5")
+    "OPERATOR_TEST_VERSION_TAG", default="9.5.0-2.2.6")
 
 OPERATOR_OLD_VERSION_TAG = os.getenv(
     "OPERATOR_TEST_OLD_VERSION_TAG", default="8.0.31-2.0.7")
@@ -115,6 +120,13 @@ AZURE_CONFIG_FILE = os.getenv(
 AZURE_CONTAINER_NAME = os.getenv(
     "OPERATOR_TEST_AZURE_CONTAINER_NAME", default=None)
 
+# KMIP
+KMIP_OKVCLIENT_ORA_PATH = os.getenv(
+    "OPERATOR_TEST_KMIP_OKVCLIENT_ORA_PATH", default=None)
+KMIP_TLS_PATH = os.getenv(
+    "OPERATOR_TEST_KMIP_TLS_PATH", default=None)
+
+
 FLUENTD_IMAGE_NAME= os.getenv(
     "OPERATOR_TEST_FLUENTD_IMAGE_NAME", default="fluent/fluentd-kubernetes-daemonset:v1.16-debian-s3-amd64-1")
 
@@ -122,6 +134,8 @@ FLUENTD_IMAGE_NAME= os.getenv(
 METRICS_IMAGE_NAME = os.getenv(
     "OPERATOR_TEST_METRICS_IMAGE_NAME", default="prom/mysqld-exporter:v0.14.0")
 
+OPERATOR_UPGRADE_RUN_ALL_TESTS = os.getenv(
+    "OPERATOR_UPGRADE_RUN_ALL_TESTS", default=False)
 
 # k8s
 K8S_CLUSTER_NAME = os.getenv(

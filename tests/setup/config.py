@@ -21,11 +21,14 @@ class Config:
     k8s_cluster = defaults.K8S_CLUSTER_NAME
     k8s_context = None
 
+    is_ee_operator = False
+
     # versions
     version_tag = defaults.VERSION_TAG
 
     min_supported_version = defaults.MIN_SUPPORTED_VERSION
     max_supported_version = defaults.MAX_SUPPORTED_VERSION
+    current_lts_version = defaults.CURRENT_LTS_VERSION
 
     # registry
     image_registry = defaults.IMAGE_REGISTRY
@@ -78,6 +81,13 @@ class Config:
     azure_config_file = defaults.AZURE_CONFIG_FILE
     azure_config_file_is_tmp = False
     azure_container_name = defaults.AZURE_CONTAINER_NAME
+
+    # KMIP Component
+    kmip_okvclient_ora_path = defaults.KMIP_OKVCLIENT_ORA_PATH
+    kmip_tls_path = defaults.KMIP_TLS_PATH
+
+    # upgrade
+    operator_upgrade_run_all_tests = defaults.OPERATOR_UPGRADE_RUN_ALL_TESTS
 
     # vault
     vault_cfg_path = defaults.OCI_VAULT_CONFIG_PATH
@@ -178,6 +188,9 @@ class Config:
 
     def get_old_version_tag(self):
         return self.min_supported_version
+
+    def get_current_lts_version(self):
+        return self.current_lts_version
 
     def get_image_registry_repository(self):
         if self.image_registry:
