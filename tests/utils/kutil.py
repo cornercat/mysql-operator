@@ -344,7 +344,7 @@ def ls_pv(ns):
 def ls_sa(ns):
     return __ls(ns, "sa")
 
-def ls_secret(ns, pattern):
+def ls_secret(ns, pattern=".*"):
     secrets = __ls(ns, "secret")
     r = re.compile(pattern)
     return [secret for secret in secrets if r.match(secret["NAME"])]
@@ -446,6 +446,8 @@ def get_cj(ns, name, jpath=None, check=True):
 def get_sa(ns, name, jpath=None, check=True):
     return get(ns, "sa", name, check=check)
 
+def get_cm(ns, name):
+    return get(ns, "cm", name)
 
 def get_ev(ns, selector, *, after=None, fields=None):
     def lookup(obj, field):
@@ -1175,7 +1177,7 @@ spec:
     apply(ns, yaml)
 
 
-def create_secrets(ns, name, data):
+def create_secrets(ns, name, data, type = ""):
     nl = "\n"
     indent = "\n  "
     yaml = f"""
@@ -1183,6 +1185,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {name}
+  namespace: {ns}
+{f"type: {type}" if type else ""}
 data:
   {indent.join(data.strip().split(nl))}
 """
@@ -1229,6 +1233,12 @@ def create_secret_from_files(ns, name, data):
 
     kubectl("create", "secret", options)
 
+def create_secret_from_paths(ns, name, paths):
+    options = [ "generic", name, "-n", ns]
+    for path in paths:
+        options.append(f"--from-file={path}")
+
+    kubectl("create", "secret", options)
 
 def create_ssl_ca_secret(ns, name, path, crlpath=None):
     data = [("ca.pem", path)]
